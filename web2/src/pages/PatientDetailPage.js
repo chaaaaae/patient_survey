@@ -582,14 +582,6 @@ const domainStats = {
   resilience: { mean: 4.28, sd: 0.72 }
 };
 
-// 수술 여부 표시 함수
-const getSurgeryDisplayText = (hasSurgery, surgeryDate) => {
-  if (hasSurgery === '예') {
-    return surgeryDate ? `예 (${surgeryDate})` : '예';
-  }
-  return hasSurgery || '정보 없음';
-};
-
 function PatientDetailPage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
@@ -1176,8 +1168,14 @@ function PatientDetailPage() {
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>수술 여부</InfoLabel>
-                  <InfoValue>{getSurgeryDisplayText(patient.hasSurgery, patient.surgeryDate)}</InfoValue>
+                  <InfoValue>{patient.hasSurgery || '정보 없음'}</InfoValue>
                 </InfoGroup>
+                {patient.surgeryDate && (
+                  <InfoGroup>
+                    <InfoLabel>수술일</InfoLabel>
+                    <InfoValue>{patient.surgeryDate}</InfoValue>
+                  </InfoGroup>
+                )}
                 <InfoGroup>
                   <InfoLabel>다른 암 진단 여부</InfoLabel>
                   <InfoValue>{patient.otherCancerDiagnosis || '정보 없음'}</InfoValue>
