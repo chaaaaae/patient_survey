@@ -1,7 +1,7 @@
 // src/pages/SurveyResultPage.jsx
 import React, { useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; // useNavigate 추가
 import SurveyResult from '../component/SurveyResult';
 import * as SurveyUtils from '../utils/SurveyUtils';
 import { saveSurveyScores } from '../utils/firebaseUtils';
@@ -26,6 +26,7 @@ const sectionIds = {
 
 const SurveyResultPage = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // useNavigate 훅 추가
   const answers = location.state?.answers || {};
   const userName = location.state?.name || localStorage.getItem('userName') || '';
   console.log('answers:', JSON.stringify(answers, null, 2));
@@ -120,6 +121,11 @@ const SurveyResultPage = () => {
       .catch(err => console.error('Error saving survey scores:', err));
   }, [userName, stdScores, meanScores, riskGroups, overallMean, overallRiskGroup, overallFeedback, additionalComments]);
 
+  // 홈으로 이동하는 함수
+  const handleGoHome = () => {
+    navigate('/'); // React Router를 사용해 홈으로 이동
+  };
+
   return (
     <Box p={4}>
       <SurveyResult
@@ -135,7 +141,7 @@ const SurveyResultPage = () => {
       <Box mt={4} display="flex" justifyContent="center">
         <Button
           variant="contained"
-          href="/"
+          onClick={handleGoHome} // href 대신 onClick 사용
           sx={{ px: 6, py: 2, fontSize: '1.1rem', fontWeight: 'bold', borderRadius: 1 }}
         >
           홈으로 가기
