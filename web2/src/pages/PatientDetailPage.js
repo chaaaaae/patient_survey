@@ -582,6 +582,14 @@ const domainStats = {
   resilience: { mean: 4.28, sd: 0.72 }
 };
 
+// 수술 여부 표시 함수
+const getSurgeryDisplayText = (hasSurgery, surgeryDate) => {
+  if (hasSurgery === '예') {
+    return surgeryDate ? `예 (${surgeryDate})` : '예';
+  }
+  return hasSurgery || '정보 없음';
+};
+
 function PatientDetailPage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
@@ -754,7 +762,14 @@ function PatientDetailPage() {
         setPatient(patientData);
         
         if (userData.surveyResults && userData.surveyResults.length > 0 && userData.surveyResults[0].stdScores) {
-          setSurveyData(userData.answers || {});
+          // 설문 답변 데이터와 피드백 데이터를 합쳐서 설정
+          const latestSurveyResult = userData.surveyResults[0];
+          const combinedSurveyData = {
+            ...(userData.answers || {}),
+            overallFeedback: latestSurveyResult.overallFeedback,
+            additionalFeedback: latestSurveyResult.additionalFeedback
+          };
+          setSurveyData(combinedSurveyData);
           
           const stdScores = userData.surveyResults[0].stdScores;
           
@@ -1161,14 +1176,8 @@ function PatientDetailPage() {
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>수술 여부</InfoLabel>
-                  <InfoValue>{patient.hasSurgery || '정보 없음'}</InfoValue>
+                  <InfoValue>{getSurgeryDisplayText(patient.hasSurgery, patient.surgeryDate)}</InfoValue>
                 </InfoGroup>
-                {patient.surgeryDate && (
-                  <InfoGroup>
-                    <InfoLabel>수술일</InfoLabel>
-                    <InfoValue>{patient.surgeryDate}</InfoValue>
-                  </InfoGroup>
-                )}
                 <InfoGroup>
                   <InfoLabel>다른 암 진단 여부</InfoLabel>
                   <InfoValue>{patient.otherCancerDiagnosis || '정보 없음'}</InfoValue>
@@ -1377,7 +1386,7 @@ function PatientDetailPage() {
             {/* 설문 결과 피드백 섹션 */}
             <Card>
               <CardTitle>환자 설문 결과 피드백</CardTitle>
-              {(!patient || (!surveyData || (!surveyData.overallFeedback && !surveyData.additionalFeedback))) ? (
+              {(!surveyData || (!surveyData.overallFeedback && (!surveyData.additionalFeedback || surveyData.additionalFeedback.length === 0))) ? (
                 <NoFeedbackState>
                   아직 설문 결과 피드백이 없습니다.
                   <br />
@@ -1398,13 +1407,23 @@ function PatientDetailPage() {
                     </FeedbackSection>
                   )}
                   
-                  {surveyData.additionalFeedback && (
+                  {surveyData.additionalFeedback && surveyData.additionalFeedback.length > 0 && (
                     <FeedbackSection>
                       <FeedbackSectionTitle type="additional">
                         추가 조언 및 참고사항
                       </FeedbackSectionTitle>
                       <FeedbackContent>
-                        {surveyData.additionalFeedback}
+                        {surveyData.additionalFeedback.map((feedback, index) => (
+                          <p key={index} style={{
+                            color: feedback.style === 'error' ? '#dc3545' : 
+                                   feedback.style === 'warning' ? '#fd7e14' : 
+                                   feedback.style === 'success' ? '#28a745' : '#495057',
+                            fontWeight: '500',
+                            marginBottom: '0.75rem'
+                          }}>
+                            {feedback.text}
+                          </p>
+                        ))}
                       </FeedbackContent>
                     </FeedbackSection>
                   )}
