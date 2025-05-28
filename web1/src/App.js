@@ -15,8 +15,7 @@ import Section4Page from './page/Section4Page';
 import Section5Page from './page/Section5Page';
 import Section6Page from './page/Section6Page';
 import Section7Page from './page/Section7Page';
-import SurveyResultPage from './page/SurveyResultPage';
-import CounselingRequestPage from './page/CounselingRequestPage';
+import SurveyResultPage from './page/SurveyResultPage'; 
 
 function App() {
   return (
@@ -38,10 +37,7 @@ function App() {
           <Route path="/section7" element={<Section7Page />} />
 
           {/* 설문 결과 페이지 */}
-          <Route path="/survey-result" element={<SurveyResultPage />} />
-          
-          {/* 상담 요청 페이지 */}
-          <Route path="/counseling-request" element={<CounselingRequestPage />} />
++         <Route path="/survey-result" element={<SurveyResultPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

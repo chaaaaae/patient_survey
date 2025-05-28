@@ -15,7 +15,7 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { useNavigate } from 'react-router-dom';
 import { saveUserAnswers } from '../utils/firebaseUtils';
 
-const Section2Component = ({ name, answers, setAnswers, setValidationError, validationError, missingQuestions = [] }) => {
+const Section2Component = ({ name, answers, setAnswers, setValidationError, validationError }) => {
   const navigate = useNavigate();
 
   // Firestore에 저장
@@ -62,7 +62,7 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
   const handleRadio = (e) => {
     const { name: qId, value } = e.target;
 
-    // q12 문항에서 3, 4, 5를 선택하면 회복을 도와주는 사람들(섹션3)으로 바로 이동
+    // q12 문항에서 3, 4, 5를 선택하면 섹션5로 바로 이동 (필수 체크 먼저!)
     if (qId === 'q12' && ['3', '4', '5'].includes(value)) {
       const updated = { ...answers, [qId]: value };
       // 9,10,11 필수 체크 (updated는 방금 값 반영됨)
@@ -77,7 +77,7 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
       }
       setAnswers(updated);
       localStorage.setItem('surveyAnswers', JSON.stringify(updated));
-      navigate('/section3', { state: { name, fromSkip: true } });
+      navigate('/section5', { state: { name, fromSkip: true } });
       return;
     }
 
@@ -101,39 +101,25 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
     setAnswers((prevAns) => ({ ...prevAns, q12_reasons: next }));
   };
 
+  const validateSection2 = () => {
+    const required = ['q9', 'q10', 'q11', 'q12'];
+    const missing = required.filter((id) => !answers[id]);
+    if (answers.q12 === '1' || answers.q12 === '2') {
+      if (!answers.q12_reasons || answers.q12_reasons.length === 0) {
+        missing.push('q12_reasons');
+      }
+    }
+    setValidationError(missing.length > 0);
+    return missing.length === 0;
+  };
+
   return (
     <Box sx={{ backgroundColor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 1 }}>
       {questions.slice(0, 4).map((q) => (
-        <FormControl 
-          component="fieldset" 
-          key={q.id} 
-          sx={{ 
-            mb: 2,
-            ...(missingQuestions.includes(q.id) && {
-              border: '2px solid #f44336',
-              borderRadius: 1,
-              p: 2,
-              backgroundColor: '#ffebee'
-            })
-          }} 
-          fullWidth
-          id={q.id}
-        >
-          <FormLabel 
-            component="legend" 
-            sx={{ 
-              fontWeight: 'bold', 
-              color: missingQuestions.includes(q.id) ? 'error.main' : 'primary.main' 
-            }}
-          >
+        <FormControl component="fieldset" key={q.id} sx={{ mb: 2 }} fullWidth>
+          <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             {q.label}
-            {missingQuestions.includes(q.id) && (
-              <Box component="span" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
-                ※ 필수 응답
-              </Box>
-            )}
           </FormLabel>
-          
           {/* 12번 문항에만 안내 문구 추가 */}
           {q.id === 'q12' && (
             <>
@@ -142,9 +128,8 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
                   <Box component="span" sx={{ fontSize: '1.2em', mr: 1 }}>※</Box>
                   <Box component="span" sx={{ color: '#1976d2', fontWeight: 700, fontSize: '1.05em', mr: 1 }}>안내</Box>
                   <Box component="span" sx={{ color: '#333' }}>
-                    <span role="img" aria-label="down">👇</span> <b>그렇지 않다</b>을 선택하신 경우, <Box component="span" sx={{ color: '#1976d2', fontWeight: 600, display: 'inline' }}>추가 질문(12-1번)</Box>이 나타납니다.
-                    <Box component="span" sx={{ color: '#666', fontSize: '0.9em', fontStyle: 'italic' }}>
-                    </Box>
+                    <span role="img" aria-label="down">👇</span> <b>1번, 2번</b>을 선택하신 경우, 아래 이유 중 해당되는 항목을 모두 선택해 주세요.<br/>
+                    <span role="img" aria-label="fast-forward">⏩</span> <b>3번, 4번, 5번</b>을 선택하신 경우, <Box component="span" sx={{ color: '#1976d2', fontWeight: 600, display: 'inline' }}>26번(생활습관) 문항</Box>으로 자동 이동합니다.
                   </Box>
                 </Typography>
               </Box>
@@ -157,7 +142,6 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
               )}
             </>
           )}
-          
           <RadioGroup
             name={q.id}
             value={answers[q.id] || ''}
@@ -203,33 +187,9 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
       )}
 
       {/* Q13 */}
-      <FormControl 
-        component="fieldset" 
-        sx={{ 
-          mb: 2,
-          ...(missingQuestions.includes('q13') && {
-            border: '2px solid #f44336',
-            borderRadius: 1,
-            p: 2,
-            backgroundColor: '#ffebee'
-          })
-        }} 
-        fullWidth
-        id="q13"
-      >
-        <FormLabel 
-          component="legend" 
-          sx={{ 
-            fontWeight: 'bold', 
-            color: missingQuestions.includes('q13') ? 'error.main' : 'primary.main' 
-          }}
-        >
+      <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
+        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
           {questions[4].label}
-          {missingQuestions.includes('q13') && (
-            <Box component="span" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
-              ※ 필수 응답
-            </Box>
-          )}
         </FormLabel>
         <RadioGroup
           name="q13"
@@ -254,36 +214,12 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError, vali
             ※ 13-1. 아래 각각의 사항에 대해서 식이조절을 얼마나 잘 하는지 체크해 주세요.
           </Typography>
           {sub13.map((item) => (
-            <FormControl 
-              component="fieldset" 
-              key={item.id} 
-              sx={{ 
-                mb: 2,
-                ...(missingQuestions.includes(item.id) && {
-                  border: '2px solid #f44336',
-                  borderRadius: 1,
-                  p: 2,
-                  backgroundColor: '#ffebee'
-                })
-              }} 
-              fullWidth
-              id={item.id}
-            >
-              <FormLabel 
-                component="legend"
-                sx={{ 
-                  color: missingQuestions.includes(item.id) ? 'error.main' : 'text.primary' 
-                }}
-              >
+            <FormControl component="fieldset" key={item.id} sx={{ mb: 2 }} fullWidth>
+              <FormLabel component="legend">
                 <Typography component="span" sx={{ fontWeight: 'bold', mr: 1 }}>
                   {item.num}
                 </Typography>
                 <Typography component="span">{item.text}</Typography>
-                {missingQuestions.includes(item.id) && (
-                  <Box component="span" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
-                    ※ 필수 응답
-                  </Box>
-                )}
               </FormLabel>
               <RadioGroup
                 name={item.id}

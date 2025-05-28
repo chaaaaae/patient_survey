@@ -50,42 +50,11 @@ const goToSurvey = () => {
             color="textPrimary"
             fontWeight={550}
             mb={3}
-            sx={{
-              fontSize: { xs: '0.9rem', sm: '1rem' }, // 모바일에서 폰트 크기 조정
-              lineHeight: { xs: 1.4, sm: 1.5 }, // 줄간격 조정
-              px: { xs: 1, sm: 0 } // 모바일에서 좌우 여백 추가
-            }}
           >
-            <Box component="span" sx={{ 
-              fontSize: { xs: '1rem', sm: '1.1rem' }, 
-              fontWeight: 600,
-              display: 'block',
-              mb: { xs: 1.5, sm: 1 }
-            }}>
-              당신의 건강한 회복을 함께 지원합니다.
-            </Box>
-            
-            {/* 데스크톱용 전체 텍스트 */}
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              이 설문은 암 진단 이후 건강관리와 심리사회적 적응을 평가하여 맞춤형 지원을 제공하기 위해 개발되었습니다.
-              <br />
-              설문 결과를 통해 개인별 건강 상태를 확인하고, 필요시 사회복지사와의 전문 상담을 통해 
-              <br />심리적 지원, 경제적 도움, 사회복귀 계획 등 종합적인 서비스를 받으실 수 있습니다.
-            </Box>
-            
-            {/* 모바일용 간결한 텍스트 */}
-            <Box sx={{ 
-              display: { xs: 'block', sm: 'none' },
-              wordBreak: 'keep-all', // 한글 단어가 중간에 끊어지지 않도록
-              overflowWrap: 'break-word', // 컨테이너를 넘어가는 긴 단어만 줄바꿈
-              lineHeight: 1.5 // 줄간격을 조금 더 여유롭게
-            }}>
-              암 진단 이후 건강관리와 심리사회적 적응을 평가합니다.
-              <br />
-              맞춤형 건강 정보 제공 및 사회복지사 전문 상담으로
-              <br />
-              종합적인 회복 지원 서비스를 받으실 수 있습니다.
-            </Box>
+            <strong>당신은 혼자가 아닙니다.</strong>  <br/>
+            이 서비스는 암 진단 이후의 건강 관리, 심리적 회복과 일상 복귀를 지원하기 위해 만들어졌습니다.
+            <br />
+            간단한 설문을 통해 현재 상태를 파악하고, 맞춤형 건강 관리 가이드를 제공하며 <br/>필요시 전문 상담도 받을 수 있습니다.
           </Typography>
 
           <CardContainer />
