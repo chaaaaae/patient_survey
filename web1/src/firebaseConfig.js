@@ -6,17 +6,17 @@ import { getFirestore } from 'firebase/firestore';
 // Firebase 설정 정보
 const firebaseConfig = {
   // 웹 클라이언트가 Firebase 서비스와 통신할 때 사용하는 API 키
-  apiKey: "AizaSyDfLPqbboIEX9GTFBv4Eqmzk8FedV3Xgs",
+  apiKey: "AIzaSyB0wQ7P_gAZUDyM1LfxgMxRciExa6l59JY",
   // Firebase 프로젝트의 인증 도메인 - OAuth 서비스에서 사용
-  authDomain: "patient-survey-7591f.firebaseapp.com",
+  authDomain: "goodai-cancer.firebaseapp.com",
   // Firebase 프로젝트의 데이터베이스 URL
-  projectId: "patient-survey-7591f",
+  projectId: "goodai-cancer",
   // Firebase 프로젝트의 스토리지 버킷 URL (이건 왜??)
-  storageBucket: "patient-survey-7591f.appspot.com",
+  storageBucket: "goodai-cancer.firebasestorage.app",
   // Firebase 프로젝트의 메시지 송신자 ID - Firebase 프로젝트 자체의 고유 ID라고 생각하면 됨
-  messagingSenderId: "258029501503",
+  messagingSenderId: "947424761858",
   // Firebase 프로젝트의 앱 ID
-  appId: "1:258029501503:web:5dc80e6337fe177804c8a"
+  appId: "1:947424761858:web:7b64ad66b04e8af3c2af1b"
 };
 
 // Firebase 초기화
