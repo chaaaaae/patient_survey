@@ -582,6 +582,22 @@ const domainStats = {
   resilience: { mean: 4.28, sd: 0.72 }
 };
 
+// 수술 여부 표시 함수
+const getSurgeryDisplayText = (hasSurgery, surgeryDate) => {
+  if (hasSurgery === '예') {
+    return surgeryDate ? `예 (${surgeryDate})` : '예';
+  }
+  return hasSurgery || '정보 없음';
+};
+
+// 암 종류 표시 함수
+const getCancerTypeDisplayText = (cancerType, otherCancerType) => {
+  if (cancerType === '기타') {
+    return otherCancerType ? `기타(${otherCancerType})` : '기타';
+  }
+  return cancerType || '정보 없음';
+};
+
 function PatientDetailPage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
@@ -1152,7 +1168,7 @@ function PatientDetailPage() {
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>암 종류</InfoLabel>
-                  <InfoValue>{patient.cancerType || '정보 없음'}</InfoValue>
+                  <InfoValue>{getCancerTypeDisplayText(patient.cancerType, patient.otherCancerType)}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>암 병기</InfoLabel>
@@ -1168,19 +1184,13 @@ function PatientDetailPage() {
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>수술 여부</InfoLabel>
-                  <InfoValue>{patient.hasSurgery || '정보 없음'}</InfoValue>
+                  <InfoValue>{getSurgeryDisplayText(patient.hasSurgery, patient.surgeryDate)}</InfoValue>
                 </InfoGroup>
-                {patient.surgeryDate && (
-                  <InfoGroup>
-                    <InfoLabel>수술일</InfoLabel>
-                    <InfoValue>{patient.surgeryDate}</InfoValue>
-                  </InfoGroup>
-                )}
                 <InfoGroup>
                   <InfoLabel>다른 암 진단 여부</InfoLabel>
                   <InfoValue>{patient.otherCancerDiagnosis || '정보 없음'}</InfoValue>
                 </InfoGroup>
-                {patient.otherCancerType && (
+                {patient.otherCancerType && patient.cancerType !== '기타' && (
                   <InfoGroup>
                     <InfoLabel>다른 암 종류</InfoLabel>
                     <InfoValue>{patient.otherCancerType}</InfoValue>
