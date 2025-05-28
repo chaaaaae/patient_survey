@@ -2,10 +2,10 @@
 
 name: prototype 1 deploy to GitHub Pages
 
-# 1) test1 브랜치에 push 될 때만 동작
+# 1) ph-pages 브랜치에 push 될 때만 동작
 on:
   push:
-    branches: [test1]
+    branches: [ph-pages]
 
 # (선택) UI에서 수동 트리거도 가능하도록 하고 싶다면 아래를 추가하세요.
 #  workflow_dispatch:
