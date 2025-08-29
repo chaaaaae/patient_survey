@@ -1,4 +1,4 @@
-// src/App.js
+// web1\src\App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
@@ -38,7 +38,10 @@ function App() {
           <Route path="/section7" element={<Section7Page />} />
 
           {/* 설문 결과 페이지 */}
-+         <Route path="/survey-result" element={<SurveyResultPage />} />
+          <Route path="/survey-result" element={<SurveyResultPage />} />
+          
+          {/* 상담 요청 페이지 - 이 라인이 빠져있었음! */}
+          <Route path="/counseling-request" element={<CounselingRequestPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -81,23 +81,13 @@ const CounselingRequestForm = () => {
               fullWidth
               variant="outlined"
             />
-            <TextField
-              name="detail"
-              label="상담받고 싶은 구체적인 내용 (선택)"
-              value={form.detail}
-              onChange={handleChange}
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-            />
             <FormControl required fullWidth variant="outlined">
-              <InputLabel id="timeslot-label">상담 가능 시간</InputLabel>
+              <InputLabel id="timeslot-label">전화 상담 가능 시간</InputLabel>
               <Select
                 labelId="timeslot-label"
                 name="timeSlot"
                 value={form.timeSlot}
-                label="상담 가능 시간"
+                label="전화 상담 가능 시간"
                 onChange={handleChange}
               >
                 <MenuItem value="08:00 ~ 09:00">08:00 ~ 09:00</MenuItem>
