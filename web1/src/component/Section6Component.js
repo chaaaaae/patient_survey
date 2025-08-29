@@ -11,9 +11,7 @@ import {
 } from '@mui/material';
 import { saveUserAnswers } from '../utils/firebaseUtils';
 
-
-// props에 name 추가
-const Section6Component = ({ name, answers, setAnswers }) => {
+const Section6Component = ({ name, answers, setAnswers, missingQuestions = [] }) => {
   // answers 변경 시마다 Firestore에 저장
   useEffect(() => {
     console.log('Section6Component useEffect – name:', name, 'answers:', answers);
@@ -47,29 +45,56 @@ const Section6Component = ({ name, answers, setAnswers }) => {
 
   return (
     <Box>
-      {questions.map((q) => (
-        <FormControl component="fieldset" key={q.id} sx={{ mb: 2 }} fullWidth>
-          <FormLabel component="legend"
-          sx={{ fontWeight: 'bold' , color:"primary.main"}}
-          
-          >{q.label}</FormLabel>
+      {questions.map((q) => {
+        const isMissing = missingQuestions.includes(q.id);
+        return (
+          <FormControl 
+            component="fieldset" 
+            key={q.id} 
+            sx={{ 
+              mb: 2,
+              ...(isMissing && {
+                border: '2px solid #f44336',
+                borderRadius: 1,
+                p: 2,
+                backgroundColor: '#ffebee'
+              })
+            }} 
+            fullWidth
+            id={q.id}
+          >
+            <FormLabel
+              component="legend"
+              sx={{ 
+                fontWeight: 'bold', 
+                color: isMissing ? 'error.main' : 'primary.main' 
+              }}
+            >
+              {q.label}
+              {isMissing && (
+                <Box component="span" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
+                  ※ 필수 응답
+                </Box>
+              )}
+            </FormLabel>
 
-          <RadioGroup 
-          //row 
-          name={q.id} 
-          value={answers[q.id] || ''} 
-          onChange={handleChange}>
-            {options.map((opt) => (
-              <FormControlLabel
-                key={opt.value}
-                value={opt.value}
-                control={<Radio />}
-                label={opt.label}
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
-      ))}
+            <RadioGroup 
+              name={q.id} 
+              value={answers[q.id] || ''} 
+              onChange={handleChange}
+            >
+              {options.map((opt) => (
+                <FormControlLabel
+                  key={opt.value}
+                  value={opt.value}
+                  control={<Radio />}
+                  label={opt.label}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        );
+      })}
     </Box>
   );
 };
