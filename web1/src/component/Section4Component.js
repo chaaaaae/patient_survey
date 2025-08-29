@@ -11,10 +11,9 @@ import {
   Radio
 } from '@mui/material';
 
-import { saveUserAnswers } from '../utils/firebaseUtils';  // Firebase 저장 함수 import 추가
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
-// props에 name 추가
-const Section4Component = ({ name, answers, setAnswers }) => {
+const Section4Component = ({ name, answers, setAnswers, missingQuestions = [] }) => {
   // answers 변경 시마다 Firestore에 저장
   useEffect(() => {
     console.log('Section4Component useEffect – name:', name, 'answers:', answers);
@@ -26,6 +25,7 @@ const Section4Component = ({ name, answers, setAnswers }) => {
       .then(() => console.log(`Saved Section4 answers for ${name}`))
       .catch(err => console.error('Error saving Section4 answers:', err));
   }, [answers, name]);
+
   const questions = [
     { id: 'q18', label: '18. 암 치료 및 건강관리와 관련해서 가족과 의견차이가 있다.' },
     { id: 'q19', label: '19. 재발에 대한 불안을 느낀다.' },
@@ -33,7 +33,7 @@ const Section4Component = ({ name, answers, setAnswers }) => {
     { id: 'q21', label: '21. 앞으로의 인생에 대한 걱정이 있다.' },
     { id: 'q22', label: '22. 암 진단 및 치료를 생각하면 지금도 두려움을 느낀다.' },
     { id: 'q23', label: '23. 암으로 인해 건강관리를 해야 된다는 생각 때문에 스트레스를 받는다.' },
-    { id: 'q24', label: '24 암 진단 후, 가정에서 내가 했던 역할(예: 엄마/아빠/아내/남편 등)의 변화로 인해 혼란을 경험한 적이 있다.' },
+    { id: 'q24', label: '24. 암 진단 후, 가정에서 내가 했던 역할(예: 엄마/아빠/아내/남편 등)의 변화로 인해 혼란을 경험한 적이 있다.' },
     { id: 'q25', label: '25. 암으로 인해 내가 해야 할 일을 제대로 하지 못한 것 때문에 죄책감을 느낀다.' }
   ];
 
@@ -52,29 +52,56 @@ const Section4Component = ({ name, answers, setAnswers }) => {
 
   return (
     <Box>
-      {questions.map((q) => (
-        <FormControl component="fieldset" key={q.id} sx={{ mb: 2 }} fullWidth>
-          <FormLabel component="legend"
-          sx={{ fontWeight: 'bold' ,color:"primary.main"}}
-         
-          >{q.label}</FormLabel>
+      {questions.map((q) => {
+        const isMissing = missingQuestions.includes(q.id);
+        return (
+          <FormControl 
+            component="fieldset" 
+            key={q.id} 
+            sx={{ 
+              mb: 2,
+              ...(isMissing && {
+                border: '2px solid #f44336',
+                borderRadius: 1,
+                p: 2,
+                backgroundColor: '#ffebee'
+              })
+            }} 
+            fullWidth
+            id={q.id}
+          >
+            <FormLabel
+              component="legend"
+              sx={{ 
+                fontWeight: 'bold', 
+                color: isMissing ? 'error.main' : 'primary.main' 
+              }}
+            >
+              {q.label}
+              {isMissing && (
+                <Box component="span" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
+                  ※ 필수 응답
+                </Box>
+              )}
+            </FormLabel>
 
-          <RadioGroup 
-          //row 
-          name={q.id} 
-          value={answers[q.id] || ''} 
-          onChange={handleChange}>
-            {options.map((opt) => (
-              <FormControlLabel
-                key={opt.value}
-                value={opt.value}
-                control={<Radio />}
-                label={opt.label}
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
-      ))}
+            <RadioGroup 
+              name={q.id} 
+              value={answers[q.id] || ''} 
+              onChange={handleChange}
+            >
+              {options.map((opt) => (
+                <FormControlLabel
+                  key={opt.value}
+                  value={opt.value}
+                  control={<Radio />}
+                  label={opt.label}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        );
+      })}
     </Box>
   );
 };

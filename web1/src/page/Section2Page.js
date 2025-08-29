@@ -26,12 +26,11 @@ const steps = [
 const Section2Page = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
   const userName = state?.name || localStorage.getItem('userName') || '';
 
-  // answers 초기값을 빈 객체로 변경
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
+  const [missingQuestions, setMissingQuestions] = useState([]);
 
   const requiredSub12 = ['1', '2'].includes(answers.q12);
   const requiredSub13 = ['4', '5'].includes(answers.q13);
@@ -47,26 +46,64 @@ const Section2Page = () => {
   const progressPercentage = (mainProgressCount / 5) * 100;
   const currentStep = 1;
 
+  // 미응답 문항으로 스크롤하는 함수
+  const scrollToFirstMissing = (missing) => {
+    if (missing.length > 0) {
+      const firstMissingElement = document.getElementById(missing[0]);
+      if (firstMissingElement) {
+        firstMissingElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    }
+  };
+
   const handleNext = () => {
-    // 9, 10, 11번 필수 체크 (undefined, 빈 문자열, 공백 모두 막기)
-    if (
-      !answers.q9 || (typeof answers.q9 === 'string' && answers.q9.trim() === '') ||
-      !answers.q10 || (typeof answers.q10 === 'string' && answers.q10.trim() === '') ||
-      !answers.q11 || (typeof answers.q11 === 'string' && answers.q11.trim() === '')
-    ) {
+    // 기본 필수 문항들
+    let requiredQuestions = ['q9', 'q10', 'q11', 'q12', 'q13'];
+    let missing = [];
+
+    // 9, 10, 11번 필수 체크
+    ['q9', 'q10', 'q11'].forEach(q => {
+      if (!answers[q] || (typeof answers[q] === 'string' && answers[q].trim() === '')) {
+        missing.push(q);
+      }
+    });
+
+    // q12 체크
+    if (!answers.q12) missing.push('q12');
+
+    // q13 체크
+    if (!answers.q13) missing.push('q13');
+
+    // q12가 1,2인 경우 q12_reasons 필요
+    if (['1', '2'].includes(answers.q12) && (!answers.q12_reasons || answers.q12_reasons.length === 0)) {
+      missing.push('q12_reasons'); // 실제 ID가 없지만 에러 표시용
+    }
+
+    // q13이 4,5인 경우 서브 문항들 필요
+    if (['4', '5'].includes(answers.q13)) {
+      sub13Ids.forEach(id => {
+        if (!answers[id]) missing.push(id);
+      });
+    }
+
+    if (missing.length > 0) {
+      setMissingQuestions(missing);
       setError(true);
+      scrollToFirstMissing(missing);
       return;
     }
-    // 기존의 추가 조건(서브질문 등)도 그대로 유지
-    if (doneCount < totalCount) {
-      setError(true);
-      return;
-    }
+
     navigate('/section3', { state: { name: userName, answers } });
   };
 
   useEffect(() => {
-    if (doneCount === totalCount) setError(false);
+    if (doneCount === totalCount) {
+      setError(false);
+      setMissingQuestions([]);
+    }
   }, [doneCount, totalCount]);
 
   return (
@@ -74,11 +111,12 @@ const Section2Page = () => {
       <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         암 생존자 건강관리 설문
       </Typography>
-      <Typography variant="subtitle1" align="center" color="textSecondary" gutterBottom>
+      <Typography variant="subtitle1" align="center" color="textSecondary" gutterBottom sx={{ mb: 4 }}>
         여러분의 건강 상태와 일상생활에 대한 것입니다. 아래 내용을 체크해 주세요.
       </Typography>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+       {/* 커스텀 스텝바 */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 5 }}>
         {steps.map((label, idx) => {
           const bg = idx < currentStep
             ? 'success.main'
@@ -97,9 +135,6 @@ const Section2Page = () => {
               >
                 {idx + 1}
               </Box>
-              <Typography variant="caption" sx={{ mt: 1, color }}>
-                {label}
-              </Typography>
             </Box>
           );
         })}
@@ -123,12 +158,18 @@ const Section2Page = () => {
           setAnswers={setAnswers}
           setValidationError={setError}
           validationError={error}
+          missingQuestions={missingQuestions}
         />
 
         {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>
-            <AlertTitle>경고</AlertTitle>
-            모든 문항을 응답해야 다음으로 넘어갈 수 있습니다.
+            <AlertTitle>미응답 문항이 있습니다</AlertTitle>
+            모든 문항을 응답해야 다음으로 넘어갈 수 있습니다. 빨간색으로 표시된 문항을 확인해 주세요.
+            {missingQuestions.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                미응답 문항: {missingQuestions.filter(q => q !== 'q12_reasons').map(q => q.replace('q', '').replace('_1_', '-1-') + '번').join(', ')}
+              </Box>
+            )}
           </Alert>
         )}
 

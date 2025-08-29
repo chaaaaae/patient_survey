@@ -15,7 +15,8 @@ import Section4Page from './page/Section4Page';
 import Section5Page from './page/Section5Page';
 import Section6Page from './page/Section6Page';
 import Section7Page from './page/Section7Page';
-import SurveyResultPage from './page/SurveyResultPage'; 
+import SurveyResultPage from './page/SurveyResultPage';
+import CounselingRequestPage from './page/CounselingRequestPage';
 
 function App() {
   return (
