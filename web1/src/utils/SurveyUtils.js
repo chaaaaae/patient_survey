@@ -1,10 +1,12 @@
 // 역코딩이 필요한 문항 번호 배열
 // export는 해당 파일 내에서 선언한 변수나 함수를 다른 파일에서 불러다 쓸 수 있도록 해주는 것
 export const reverseIds = [1,2,3,4,5,6,7,8,18,19,20,21,22,23,24,25,26,27,28];
+
 // 역코딩 함수
 export function reverseScore(score, max=5, min=1) {
     return max + min - score;
-  }
+}
+
 // 여러 문항에 역코딩을 적용하는 함수
 export function applyReverseScore(answers) {
     // 역코딩 된 결과를 담을 객체
@@ -28,24 +30,50 @@ export const SectionStats =  {
     "사회적 삶의 부담": { mean: 3.39, sd: 1.20 },
     "암 이후 탄력성": { mean: 4.28, sd: 0.72 },
     "전체 평균 (암 생존자 건강관리)": { mean: 3.46, sd: 0.65 }
-  };
-// 점수 변환 함수
+};
+
+// T-점수별 Cut-off 기준 (이미지 표 기준)
+export const CutoffScores = {
+    "암 이후 내 몸의 변화": { high: 40, low: 60 },        // ≤40: 고위험, 40초과~60: 주의, >60: 저위험
+    "건강한 삶을 위한 관리": { high: 40, low: 60 },
+    "회복을 도와주는 사람들": { high: 40, low: 60 },
+    "심리적 부담": { high: 40, low: 60 },
+    "사회적 삶의 부담": { high: 40, low: 60 },
+    "암 이후 탄력성": { high: 40, low: 60 },
+    "전체 평균 (암 생존자 건강관리)": { high: 40, low: 60 }
+};
+
+// T-점수 변환 함수 (평균 50, 표준편차 10)
 export function newScore(sectionName, userScore) {
     const stat = SectionStats[sectionName];
     if (!stat || typeof userScore !== 'number' || isNaN(userScore)) return null;
+    
+    // Z점수 계산: (개인 점수 - 평균) / 표준편차
     const z_score = (userScore - stat.mean) / stat.sd;
-    return Math.round((z_score * 16.67) + 50);
+    
+    // T점수 계산: (Z점수 * 10) + 50
+    return Math.round((z_score * 10) + 50);
 }
-// 점수별 집단 분류 함수
+
+// 점수별 집단 분류 함수 (T-점수 기준 Cut-off 적용)
 export function getRiskGroup(sectionName, meanScore) {
     const stat = SectionStats[sectionName];
     if (!stat || typeof meanScore !== 'number' || isNaN(meanScore)) return null;
-    // 섹션별 점수 지표 가져와서 cut-off score 계산
-    const cutoff = stat.mean - stat.sd;
-    if (meanScore <= cutoff) return "고위험집단";
-    if (meanScore <= stat.mean) return "주의집단";
-    return "저위험집단";
-  }
+    
+    // 먼저 T-점수로 변환
+    const tScore = newScore(sectionName, meanScore);
+    if (tScore === null) return null;
+    
+    // Cut-off 기준 가져오기
+    const cutoff = CutoffScores[sectionName];
+    if (!cutoff) return null;
+    
+    // T-점수 기준으로 집단 분류
+    if (tScore <= cutoff.high) return "고위험집단";        // ≤40
+    if (tScore <= cutoff.low) return "주의집단";           // 40초과~60
+    return "저위험집단";                                  // >60
+}
+
 // 설문조사 결과(집단)에 따른 **고정** 코멘트 
 export const Comments = {
   patient: {
@@ -59,6 +87,7 @@ export const Comments = {
     "저위험집단": "환자가 저위험집단에 해당합니다. 현재 상태를 유지할 수 있도록 지속적인 격려가 필요합니다."
   }
 };
+
 // 메인 코멘트만 반환
 export function getPatientComment(group) {
   return Comments.patient[group] || "";
@@ -76,7 +105,6 @@ const SUB13 = [
   { id:'q13_1_5', text:'탄수화물 섭취를 조절한다.',        comment:"정제 탄수화물 대신 통곡물을 선택해 보세요." },
   { id:'q13_1_6', text:'항암식품을 먹는다.',               comment:"항암식품을 꾸준히 섭취해 보세요." }
 ];
-
 
  // Q10, Q12-1 조건 추가
 const BASE_RULES = [
@@ -151,7 +179,7 @@ const FEEDBACK_RULES = [
   },
   // ...나머지 RULES 그대로...
   ...DIET_RULES,
-  /* 7-A. 암 이후 ‘절주’ 문항이 3·4·5 → 금주 권장 */
+  /* 7-A. 암 이후 '절주' 문항이 3·4·5 → 금주 권장 */
   {
     id: "alcohol_warning",
     condition: (a) => {
@@ -162,7 +190,7 @@ const FEEDBACK_RULES = [
     style: "warning"
   },
 
-  /* 7-B. 암 이후 ‘금연’ 문항이 1·2·3 → 금연 권장 */
+  /* 7-B. 암 이후 '금연' 문항이 1·2·3 → 금연 권장 */
   {
     id: "smoke_warning",
     condition: (a) => {
@@ -182,24 +210,4 @@ export function getAdditionalFeedback(answers={}, mean={}, risk={}) {
     .filter(r => r.condition(answers, mean, risk))
     // 2) { text: comment, style } 형태로 매핑
     .map(r => ({ text:r.comment, style:r.style }));
-}
-
-export function getPercentile(tScore) {
-  if (typeof tScore !== 'number' || isNaN(tScore)) return '-';
-  const z = (tScore - 50) / 10;
-  const percentile = Math.round(100 * 0.5 * (1 + erf(z / Math.sqrt(2))));
-  return percentile;
-}
-
-// 정규분포 누적분포 함수 근사값
-function erf(x) {
-  const sign = x >= 0 ? 1 : -1;
-  x = Math.abs(x);
-
-  const a1 = 0.254829592, a2 = -0.284496736,
-        a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429,
-        p = 0.3275911;
-  const t = 1 / (1 + p * x);
-  const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x));
-  return sign * y;
 }
