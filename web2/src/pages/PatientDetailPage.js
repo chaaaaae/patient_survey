@@ -613,13 +613,13 @@ function PatientDetailPage() {
   const [error, setError] = useState(null);
   const [surveyData, setSurveyData] = useState(null);
   const [categoryScores, setCategoryScores] = useState({
-    physicalChange: { title: '신체적 변화', score: 0 },
-    healthManagement: { title: '건강 관리', score: 0 },
-    socialSupport: { title: '사회적 지지', score: 0 },
-    psychologicalBurden: { title: '심리적 부담', score: 0 },
-    socialBurden: { title: '사회적 부담', score: 0 },
-    resilience: { title: '회복 탄력성', score: 0 }
-  });
+    physicalChange: { title: '신체적 변화', score: 0, meanScore: 0 },
+    healthManagement: { title: '건강 관리', score: 0, meanScore: 0 },
+    socialSupport: { title: '사회적 지지', score: 0, meanScore: 0 },
+    psychologicalBurden: { title: '심리적 부담', score: 0, meanScore: 0 },
+    socialBurden: { title: '사회적 부담', score: 0, meanScore: 0 },
+    resilience: { title: '회복 탄력성', score: 0, meanScore: 0 }
+});
   
   // URL에서 탭 파라미터를 읽어와서 초기 탭 설정
   const [activeTab, setActiveTab] = useState('overview');
@@ -669,13 +669,13 @@ function PatientDetailPage() {
           if (validScores.length > 0) {
             const averageScore = validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
             
-            // 평균 점수 기준으로 위험도 결정
-            if (averageScore < 40) {
-              riskLevel = 'high'; // 40점 미만은 위험
-            } else if (averageScore < 50) {
-              riskLevel = 'medium'; // 40~49점은 주의
+            // 평균 점수 기준으로 위험도 결정 (수정된 기준)
+            if (averageScore <= 40) {
+              riskLevel = 'high'; // 40점 이하는 위험
+            } else if (averageScore <= 60) {
+              riskLevel = 'medium'; // 40점 초과 60점 이하는 주의
             } else {
-              riskLevel = 'low'; // 50점 이상은 양호
+              riskLevel = 'low'; // 60점 초과는 양호
             }
           }
         } else {
@@ -780,32 +780,39 @@ function PatientDetailPage() {
           setSurveyData(combinedSurveyData);
           
           const stdScores = userData.surveyResults[0].stdScores;
+          const meanScores = userData.surveyResults[0].meanScores; // meanScores 가져오기
           
-          // 카테고리별 점수 설정 (디비에서 직접 가져온 점수 사용)
+          // 카테고리별 점수 설정 (stdScores와 meanScores 모두 포함)
           const updatedCategoryScores = {
             physicalChange: { 
               title: '신체적 변화', 
-              score: typeof stdScores.physicalChange === 'number' ? stdScores.physicalChange : null 
+              score: typeof stdScores.physicalChange === 'number' ? stdScores.physicalChange : null,
+              meanScore: typeof meanScores.physicalChange === 'number' ? meanScores.physicalChange : null
             },
             healthManagement: { 
               title: '건강 관리', 
-              score: typeof stdScores.healthManagement === 'number' ? stdScores.healthManagement : null 
+              score: typeof stdScores.healthManagement === 'number' ? stdScores.healthManagement : null,
+              meanScore: typeof meanScores.healthManagement === 'number' ? meanScores.healthManagement : null
             },
             socialSupport: { 
               title: '사회적 지지', 
-              score: typeof stdScores.socialSupport === 'number' ? stdScores.socialSupport : null 
+              score: typeof stdScores.socialSupport === 'number' ? stdScores.socialSupport : null,
+              meanScore: typeof meanScores.socialSupport === 'number' ? meanScores.socialSupport : null
             },
             psychologicalBurden: { 
               title: '심리적 부담', 
-              score: typeof stdScores.psychologicalBurden === 'number' ? stdScores.psychologicalBurden : null 
+              score: typeof stdScores.psychologicalBurden === 'number' ? stdScores.psychologicalBurden : null,
+              meanScore: typeof meanScores.psychologicalBurden === 'number' ? meanScores.psychologicalBurden : null
             },
             socialBurden: { 
               title: '사회적 부담', 
-              score: typeof stdScores.socialBurden === 'number' ? stdScores.socialBurden : null 
+              score: typeof stdScores.socialBurden === 'number' ? stdScores.socialBurden : null,
+              meanScore: typeof meanScores.socialBurden === 'number' ? meanScores.socialBurden : null
             },
             resilience: { 
               title: '회복 탄력성', 
-              score: typeof stdScores.resilience === 'number' ? stdScores.resilience : null 
+              score: typeof stdScores.resilience === 'number' ? stdScores.resilience : null,
+              meanScore: typeof meanScores.resilience === 'number' ? meanScores.resilience : null
             }
           };
           
@@ -980,8 +987,8 @@ function PatientDetailPage() {
     labels: Object.values(categoryScores).map(cat => cat.title),
     datasets: [
       {
-        label: '취득 점수',
-        data: Object.values(categoryScores).map(cat => cat.score !== null ? cat.score : 0),
+        label: '평균 점수',
+        data: Object.values(categoryScores).map(cat => cat.meanScore !== null ? cat.meanScore : 0), // meanScore 사용
         backgroundColor: 'rgba(42, 94, 140, 0.2)',
         borderColor: 'rgba(42, 94, 140, 1)',
         borderWidth: 2,
@@ -998,9 +1005,9 @@ function PatientDetailPage() {
           display: true
         },
         min: 0,
-        max: 100,
+        max: 5,
         ticks: {
-          stepSize: 20
+          stepSize: 1
         }
       }
     },
