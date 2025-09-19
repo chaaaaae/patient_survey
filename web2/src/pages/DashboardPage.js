@@ -499,8 +499,8 @@ function DashboardPage() {
                 if (answeredQuestions > 0 && domainStats[category]) {
                   // Z 점수 계산
                   const zScore = (scaleScore - domainStats[category].mean) / domainStats[category].sd;
-                  // NewScore 계산: (Z점수 * 16.67) + 50
-                  const newScore = Math.round((zScore * 16.67) + 50);
+                  // NewScore 계산: (Z점수 * 10) + 50
+                  const newScore = Math.round((zScore * 10) + 50);
                   totalNewScore += newScore;
                   categoriesWithScores++;
                 }
@@ -510,13 +510,13 @@ function DashboardPage() {
               averageNewScore = categoriesWithScores > 0 ? totalNewScore / categoriesWithScores : 0;
               
               // 평균 newScore 기준으로 위험도 결정
-              if (averageNewScore < 40) {
-                riskLevel = 'high'; // 40점 미만은 위험
+              if (averageNewScore <= 40) {
+                riskLevel = 'high'; // 40점 이하는 위험
                 highRiskPatients++;
-              } else if (averageNewScore < 50) {
-                riskLevel = 'medium'; // 40~49점은 주의
+              } else if (averageNewScore <= 60) {
+                riskLevel = 'medium'; // 40점 초과 60점 이하는 주의
               } else {
-                riskLevel = 'low'; // 50점 이상은 양호호
+                riskLevel = 'low'; // 60점 초과는 양호
               }
             } else {
               // 설문 데이터가 없는 경우 기존 로직으로 대체
